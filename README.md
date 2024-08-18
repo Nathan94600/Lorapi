@@ -18,7 +18,7 @@ npm install lorapi
 Get informations about the status of a region :
 
 ```ts
-import Lorapi from "./dist/index";
+import Lorapi from "lorapi";
 
 const lorapi = new Lorapi("Your RIOT_TOKEN", "EUROPE");
 
@@ -35,7 +35,7 @@ lorapi.getStatus().then(platformData => {
 Get game mode and player puuids for a match :
 
 ```ts
-import Lorapi from "./dist/index";
+import Lorapi from "lorapi";
 
 const lorapi = new Lorapi("Your RIOT_TOKEN", "EUROPE");
 
@@ -52,7 +52,7 @@ lorapi.getMatch("MATCH_ID").then(match => {
 Get player name and rank in master tier :
 
 ```ts
-import Lorapi from "./dist/index";
+import Lorapi from "lorapi";
 
 const lorapi = new Lorapi("Your RIOT_TOKEN", "EUROPE");
 
