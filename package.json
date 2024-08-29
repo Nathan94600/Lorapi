@@ -19,8 +19,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nathan94600/Lorapi"
+    "url": "git+https://github.com/Nathan94600/Lorapi.git"
   },
+  "bugs": {
+    "url": "https://github.com/Nathan94600/Lorapi/issues"
+  },
+  "homepage": "https://github.com/Nathan94600/Lorapi#readme",
   "author": "Nathan94600",
   "license": "MIT",
   "description": "Lorapi is a Node.js module for interacting with League of Runeterra API.",

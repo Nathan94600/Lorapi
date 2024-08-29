@@ -192,19 +192,19 @@ function getMatch(cache: Cache, rateLimits: RateLimits, matchId: string, region:
 /**
  * @param riotToken See https://developer.riotgames.com/
  */
-function getPlayerMatchIds(cache: Cache, rateLimits: RateLimits, puuid: string, region: Region, riotToken: string): Promise<PlayerMatch[] | string> {
+function getPlayerMatches(cache: Cache, rateLimits: RateLimits, puuid: string, region: Region, riotToken: string): Promise<PlayerMatch[] | string> {
 	return new Promise((resolve, reject) => {
 		const rateLimit = rateLimits[region], cacheValue = cache.playerMatchIds[region][puuid];
 
 		if (cacheValue?.lastUpdate && cacheValue.lastUpdate + 300000 <= Date.now()) resolve(cacheValue.ids.map(id => new PlayerMatch(id, cache, rateLimits, region, riotToken)));
 		else if (rateLimit.app[0].count >= rateLimit.app[0].max || rateLimit.app[1].count >= rateLimit.app[1].max) reject("App Rate Limit");
-		else if (rateLimit.getPlayerMatchIds.count >= rateLimit.getPlayerMatchIds.max) reject("Method Rate Limit");
+		else if (rateLimit.getPlayerMatches.count >= rateLimit.getPlayerMatches.max) reject("Method Rate Limit");
 		else fetch(`https://${region.toLowerCase()}${BASE_URL}match/v1/matches/by-puuid/${puuid}/ids`, { method: "GET", headers: { "X-Riot-Token": riotToken } }).then(res => {
 			const retryAfterHeader = res.headers.get("retry-after");
 
-			updateRateLimit(rateLimit, "getPlayerMatchIds", res.headers);
+			updateRateLimit(rateLimit, "getPlayerMatches", res.headers);
 
-			if (retryAfterHeader && res.status == 429) setTimeout(async () => resolve(await getPlayerMatchIds(cache, rateLimits, puuid, region, riotToken)), parseInt(retryAfterHeader) * 1000);
+			if (retryAfterHeader && res.status == 429) setTimeout(async () => resolve(await getPlayerMatches(cache, rateLimits, puuid, region, riotToken)), parseInt(retryAfterHeader) * 1000);
 			else res.json().then(json => {
 				if (res.status.toString()[0] == "2") {
 					if (!Array.isArray(json)) reject({ reason: "Bad response type", value: json });
@@ -329,7 +329,7 @@ class PlayerMatches {
 	private readonly region: Region;
 	private readonly riotToken: string;
 
-	matches() { return getPlayerMatchIds(this.cache, this.rateLimits, this.puuid, this.region, this.riotToken) };
+	matches() { return getPlayerMatches(this.cache, this.rateLimits, this.puuid, this.region, this.riotToken) };
 };
 
 class PlayerMatch {
@@ -364,7 +364,7 @@ export default class Lorapi {
 				getDecks: { count: 0, max: Infinity, timeout: null },
 				getInventory: { count: 0, max: Infinity, timeout: null },
 				getMatch: { count: 0, max: Infinity, timeout: null },
-				getPlayerMatchIds: { count: 0, max: Infinity, timeout: null },
+				getPlayerMatches: { count: 0, max: Infinity, timeout: null },
 				getPlayersInMasterTier: { count: 0, max: Infinity, timeout: null },
 				getStatus: { count: 0, max: Infinity, timeout: null },
 			},
@@ -373,7 +373,7 @@ export default class Lorapi {
 				getDecks: { count: 0, max: Infinity, timeout: null },
 				getInventory: { count: 0, max: Infinity, timeout: null },
 				getMatch: { count: 0, max: Infinity, timeout: null },
-				getPlayerMatchIds: { count: 0, max: Infinity, timeout: null },
+				getPlayerMatches: { count: 0, max: Infinity, timeout: null },
 				getPlayersInMasterTier: { count: 0, max: Infinity, timeout: null },
 				getStatus: { count: 0, max: Infinity, timeout: null },
 			},
@@ -382,7 +382,7 @@ export default class Lorapi {
 				getDecks: { count: 0, max: Infinity, timeout: null },
 				getInventory: { count: 0, max: Infinity, timeout: null },
 				getMatch: { count: 0, max: Infinity, timeout: null },
-				getPlayerMatchIds: { count: 0, max: Infinity, timeout: null },
+				getPlayerMatches: { count: 0, max: Infinity, timeout: null },
 				getPlayersInMasterTier: { count: 0, max: Infinity, timeout: null },
 				getStatus: { count: 0, max: Infinity, timeout: null },
 			}
@@ -421,7 +421,7 @@ export default class Lorapi {
 	/**
 	 * Get a list of match ids by PUUID
 	 */
-	getPlayerMatchIds(puuid: Puuid, region?: Region) { return getPlayerMatchIds(this.cache, this.rateLimits, puuid, region || this.defaultRegion, this.riotToken) };
+	getPlayerMatches(puuid: Puuid, region?: Region) { return getPlayerMatches(this.cache, this.rateLimits, puuid, region || this.defaultRegion, this.riotToken) };
 
 	/**
 	 * Return a list of cards owned by the calling user.
@@ -441,7 +441,7 @@ export default class Lorapi {
 
 // Types
 
-type FunctionName = "getStatus" | "getPlayersInMasterTier" | "getMatch" | "getPlayerMatchIds" | "getInventory" | "getDecks";
+type FunctionName = "getStatus" | "getPlayersInMasterTier" | "getMatch" | "getPlayerMatches" | "getInventory" | "getDecks";
 
 type RateLimits = Record<Region, Record<"app", [RateLimit, RateLimit]> & Record<FunctionName, RateLimit>>;
 
